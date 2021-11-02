@@ -36,7 +36,7 @@ public class OrderService {
 
     public WebshopOrder initializeOrder(long customerId) {
         return customerRepository.findById(customerId)
-                .map(this::createNewOrder)
+                .map(this::createAndSaveOrder)
                 .orElseThrow(() -> new CustomerNotFoundException(customerId));
     }
 
@@ -51,11 +51,9 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
     }
 
-    private WebshopOrder createNewOrder(Customer customer) {
-        WebshopOrder webshopOrder = new WebshopOrder();
-        webshopOrder.setCustomer(customer);
-        webshopOrder.setStatus(OrderStatus.DRAFT);
-        return webshopOrder;
+    private WebshopOrder createAndSaveOrder(Customer customer) {
+        WebshopOrder newOrder = createNewOrder(customer);
+        return orderRepository.save(newOrder);
     }
 
     private WebshopOrder calculateAndFinalizeOrder(WebshopOrder order) {
@@ -71,5 +69,12 @@ public class OrderService {
 
         orderRepository.save(order);
         return order;
+    }
+
+    private WebshopOrder createNewOrder(Customer customer) {
+        WebshopOrder webshopOrder = new WebshopOrder();
+        webshopOrder.setCustomer(customer);
+        webshopOrder.setStatus(OrderStatus.DRAFT);
+        return webshopOrder;
     }
 }
