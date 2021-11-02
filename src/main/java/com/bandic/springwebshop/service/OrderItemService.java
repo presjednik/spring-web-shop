@@ -1,6 +1,5 @@
 package com.bandic.springwebshop.service;
 
-import com.bandic.springwebshop.exception.EntityNotFoundException;
 import com.bandic.springwebshop.exception.OrderItemNotFoundException;
 import com.bandic.springwebshop.exception.ProductNotAvailableException;
 import com.bandic.springwebshop.exception.ProductNotFoundException;
@@ -24,8 +23,12 @@ public class OrderItemService {
 
     public void addOrderItem(WebshopOrder order, long productId, int quantity) {
         productRepository.findById(productId)
-                .map(product -> saveOrderItemIfProductIsAvailable(order, product, quantity))
-                .orElseThrow(() -> new ProductNotFoundException(productId));
+                .ifPresentOrElse(
+                        product -> saveOrderItemIfProductIsAvailable(order, product, quantity),
+                        () -> {
+                            throw new ProductNotFoundException(productId);
+                        }
+                );
     }
 
     public void removeOrderItem(long orderItemId) {
@@ -36,12 +39,12 @@ public class OrderItemService {
                         });
     }
 
-    private OrderItem saveOrderItemIfProductIsAvailable(WebshopOrder order, Product product, int quantity) {
+    private void saveOrderItemIfProductIsAvailable(WebshopOrder order, Product product, int quantity) {
         if (!product.getIsAvailable()) {
             throw new ProductNotAvailableException(product.getId());
         }
 
-        return orderItemRepository.save(createOrderItem(order, product, quantity));
+        orderItemRepository.save(createOrderItem(order, product, quantity));
     }
 
     private void deleteOrderItem(OrderItem orderItem) {

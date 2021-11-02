@@ -17,13 +17,21 @@ public class EuroConverterService {
     private final WebClient webClient;
 
     public BigDecimal getEuroExchangeRate() {
-        HnbEuroExchangeDto hnbEuroExchangeDto = webClient.get()
-                .retrieve()
-                .bodyToFlux(HnbEuroExchangeDto.class)
-                .blockFirst(Duration.ofSeconds(3));
+        HnbEuroExchangeDto hnbEuroExchangeDto;
+        try {
+            hnbEuroExchangeDto = webClient.get()
+                    .retrieve()
+                    .bodyToFlux(HnbEuroExchangeDto.class)
+                    .blockFirst(Duration.ofSeconds(3));
+
+        } catch (Exception e) {
+            log.debug("Exception while getting HNB dto.", e);
+            throw new HnbExchangeException();
+        }
 
         log.info("HNB euro exchange DTO: {}", hnbEuroExchangeDto);
         return stringToBigDecimal(hnbEuroExchangeDto);
+
     }
 
     private BigDecimal stringToBigDecimal(HnbEuroExchangeDto dto) {
@@ -32,8 +40,9 @@ public class EuroConverterService {
                 return new BigDecimal(dto.getMiddleExchangeRate().replace(",", "."));
             }
         } catch (NumberFormatException e) {
-            log.error("Couldn't format middle exhange rate from HNB to BigDecimal", e);
+            log.error("Couldn't format middle exchange rate from HNB to BigDecimal", e);
         }
+
         throw new HnbExchangeException();
     }
 }

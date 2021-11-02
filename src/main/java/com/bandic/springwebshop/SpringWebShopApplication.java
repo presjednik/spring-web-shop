@@ -1,5 +1,6 @@
 package com.bandic.springwebshop;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,7 @@ public class SpringWebShopApplication {
     }
 
     @Bean
-    public WebClient webClient() {
-        return WebClient.create("https://api.hnb.hr/tecajn/v1?valuta=EUR");
+    public WebClient webClient(@Value("${hnb.exchange.rate.url}") String url) {
+        return WebClient.create(url);
     }
 }

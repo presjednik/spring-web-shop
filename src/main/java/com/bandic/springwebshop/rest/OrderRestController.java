@@ -1,6 +1,5 @@
 package com.bandic.springwebshop.rest;
 
-import com.bandic.springwebshop.exception.EntityNotFoundException;
 import com.bandic.springwebshop.exception.OrderNotFoundException;
 import com.bandic.springwebshop.model.OrderItem;
 import com.bandic.springwebshop.model.WebshopOrder;
